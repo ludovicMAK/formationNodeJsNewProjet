@@ -75,74 +75,18 @@ require('dotenv').config();
 // }
 
 const {connectDb} = require('./src/services/mongoose')
-
 const User = require('./src/models/user');
+const userRoutes = require('./src/routes/user.js');
 const express = require('express');
 const app = express();
 const port = process.env.Port || 3000;
 
 connectDb().catch(err => console.log(err));
 
-app.use(express.json())
+app.use(express.json());
+app.use(userRoutes);
 
-app.post('/users',async (req,res,next)=>{
 
-    //console.log(req.body);
-    const user = new User(req.body);
-    try{
-        const saveUser = await user.save();
-        res.status(201).send(saveUser)
-    }catch(e){
-        res.status(400).send(e);
-    }
-    
-   
-});
-
-app.get('/users',async(req,res,next)=>{
-    try{
-        const users = await User.find({});
-        res.send(users);
-    }catch(e){
-        res.status(500).send(e)
-    }
-});
-
-app.get('/users/:id',async(req,res,next)=>{
-    const userId = req.params.id;
-    try{
-        const user = await User.findById(userId);
-        if(!user) return res.status(404).send('User not found');
-        res.send(user);
-    }catch(e){
-        res.status(500).send(e)
-    }
-});
-
-app.patch('/users/:id',async(req,res,next)=>{
-    const userId = req.params.id;
-    try{
-        const user = await User.findByIdAndUpdate(userId,req.body,{
-            new:true,
-            runValidators:true
-        });
-        if(!user) return res.status(404).send('User not found');
-        res.send(user);
-    }catch(e){
-        res.status(500).send(e)
-    }
-})
-
-app.delete('/users/:id',async(req,res,next)=>{
-    const userId = req.params.id;
-    try{
-        const user = await User.findByIdAndDelete(userId);
-        if(!user) return res.status(404).send('User not found');
-        res.send(user);
-    }catch(e){
-        res.status(500).send(e)
-    }
-})
 
 app.listen(port,()=>{
     console.log(`Le serveur est lancé à: http://localhost:${port}`);
