@@ -85,12 +85,37 @@ connectDb().catch(err => console.log(err));
 
 app.use(express.json())
 
-app.post('/todos',async (req,res,next)=>{
+app.post('/users',async (req,res,next)=>{
 
     //console.log(req.body);
     const user = new User(req.body);
-    const saveUser = await user.save();
-    res.send(saveUser)
+    try{
+        const saveUser = await user.save();
+        res.status(201).send(saveUser)
+    }catch(e){
+        res.status(400).send(e);
+    }
+    
+   
+})
+
+app.get('/users',async(req,res,next)=>{
+    try{
+        const users = await User.find({});
+        res.send(users);
+    }catch(e){
+        res.status(500).send(e)
+    }
+})
+
+app.get('/users/:id',async(req,res,next)=>{
+    const userId = req.params.id;
+    try{
+        const user = await User.findById(userId);
+        res.send(user);
+    }catch(e){
+        res.status(500).send(e)
+    }
 })
 
 app.listen(port,()=>{
