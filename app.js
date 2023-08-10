@@ -73,53 +73,34 @@ require('dotenv').config();
 //     // console.log(`Documents insérés => `, insertStuff);
 //     return 'done'
 // }
-const mongoose = require('mongoose');
-const validator = require('validator')
-main().catch(err => console.log(err))
-    
 
-async function main(){
-    await mongoose.connect(process.env.MONGO_URL);
-    const User = mongoose.model('User',{
-        // name: {
-        //     type:String,
-        //     required:true
-        // },
-        // age:{
-        //     type:Number,
-        //     required:true,
-        //     validate(c){
-        //         if(v<0) throw new Error('Age doit être positif!')
-        //     }
-        // }
-        email:{
-            type:String,
-            required:true,
-            validate(v){
-                if(!validator.isEmail(v)) throw new Error('Email non valide!');
-            }
-        },
-        password:{
-            type:String,
-            required:true,
-            validate(v){
-                if(!validator.isLength(v,{min:4,max:20})) throw new Error('le mdp doit être entre 4 à 20 caractère');
-            }
-        }
-    });
+const {connectDb} = require('./src/services/mongoose')
 
-    const firstPerson = new User({
-       email:'test@exemple.com',
-       password:'password'
-    });
-    const secondPerson = new User({
-        email:'Justine@gmail.com',
-        password:'password'
-    });
+const User = require('./src/models/user');
+const express = require('express');
+const app = express();
+const port = process.env.Port || 3000;
+
+connectDb().catch(err => console.log(err));
+
+app.use(express.json())
+
+app.post('/todos',async (req,res,next)=>{
+
+    //console.log(req.body);
+    const user = new User(req.body);
+    const saveUser = await user.save();
+    res.send(saveUser)
+})
+
+app.listen(port,()=>{
+    console.log(`Le serveur est lancé à: http://localhost:${port}`);
+});
 
     
-    const firstSave = await firstPerson.save();
-    const secondeSave = await secondPerson.save();
+// REST API = REpresentation state transfer - Application programming interface
+// Api = outil pour vous aider à programmer (module npm/fs)
+// REST = web app d'accéder et manipuler des ressources en utilisant des opération prédéfinie
+//Ressources = Utilisateur/todo
+// Opérations = créer un todo/ supprimer un todo / supprimer un utilisateur
 
-    console.log(firstSave,secondeSave);
-}
