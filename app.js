@@ -97,7 +97,7 @@ app.post('/users',async (req,res,next)=>{
     }
     
    
-})
+});
 
 app.get('/users',async(req,res,next)=>{
     try{
@@ -106,12 +106,38 @@ app.get('/users',async(req,res,next)=>{
     }catch(e){
         res.status(500).send(e)
     }
-})
+});
 
 app.get('/users/:id',async(req,res,next)=>{
     const userId = req.params.id;
     try{
         const user = await User.findById(userId);
+        if(!user) return res.status(404).send('User not found');
+        res.send(user);
+    }catch(e){
+        res.status(500).send(e)
+    }
+});
+
+app.patch('/users/:id',async(req,res,next)=>{
+    const userId = req.params.id;
+    try{
+        const user = await User.findByIdAndUpdate(userId,req.body,{
+            new:true,
+            runValidators:true
+        });
+        if(!user) return res.status(404).send('User not found');
+        res.send(user);
+    }catch(e){
+        res.status(500).send(e)
+    }
+})
+
+app.delete('/users/:id',async(req,res,next)=>{
+    const userId = req.params.id;
+    try{
+        const user = await User.findByIdAndDelete(userId);
+        if(!user) return res.status(404).send('User not found');
         res.send(user);
     }catch(e){
         res.status(500).send(e)
