@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const jwt  = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
     // name: {
@@ -27,10 +28,20 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:true,
         validate(v){
-            if(!validator.isLength(v,{min:4,max:20})) throw new Error('le mdp doit être entre 4 à 20 caractère');
+            if(!validator.isLength(v,{min:4})) throw new Error('le mdp doit être entre 4 à 20 caractère');
         }
     }
+    ,
+    authTokens:[{
+        authToken:{
+            type:String,
+            required:true
+        }
+    }]
 })
+
+
+
 
 userSchema.statics.findUser = async(email,password)=>{
     const user = await User.findOne({email});
@@ -39,6 +50,15 @@ userSchema.statics.findUser = async(email,password)=>{
     const isPasswordValide = await bcrypt.compare(password,user.password);
     if(!isPasswordValide) throw new Error('Erreur, pas possible de se connecter');
     return user;
+}
+
+userSchema.methods.generateAuthTokenAndSaveUser = async function()
+{
+    const authToken = jwt.sign({ _id: this._id.toString() },'foo');
+    this.authTokens.push({authToken});
+    await this.save();
+    return authToken;
+
 }
 
 userSchema.pre('save', async function(){
