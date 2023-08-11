@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
 
-const User = mongoose.model('User',{
+const userSchema = new mongoose.Schema({
     // name: {
     //     type:String,
     //     required:true
@@ -27,6 +28,11 @@ const User = mongoose.model('User',{
             if(!validator.isLength(v,{min:4,max:20})) throw new Error('le mdp doit être entre 4 à 20 caractère');
         }
     }
-});
+})
+
+userSchema.pre('save', async function(){
+    if (this.isModified('password')) this.password = await bcrypt.hash(this.password,8);
+})
+const User = mongoose.model('User',userSchema);
 
 module.exports = User;
