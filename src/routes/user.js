@@ -75,6 +75,29 @@ router.post('/users/login', async (req,res)=>{
     }catch(e){
         res.status(400).send("probleme");
     }
+});
+
+router.post('/users/logout',authentification ,async (req,res)=>{
+    try{
+        req.user.authTokens = req.user.authTokens.filter((authToken) =>{
+            return authToken.authToken !== req.authToken;
+        });
+
+        await req.user.save();
+        res.send();
+    }catch(e){
+        res.status(500).send();
+    }
+})
+
+router.post('/users/logout/all',authentification ,async (req,res)=>{
+    try{
+        req.user.authTokens= [];
+        await req.user.save();
+        res.send();
+    }catch(e){
+        res.status(500).send();
+    }
 })
 
 module.exports = router

@@ -6,7 +6,8 @@ const authentification = async (req, res,next)=>{
         const authToken = req.header('Authorization').replace('Bearer ', '');
         const decodedToken = jwt.verify(authToken,'foo');
         const user = await User.findOne({_id: decodedToken._id, 'authTokens.authToken': authToken});
-        if(!user ) throw new Error
+        if(!user ) throw new Error;
+        req.authToken = authToken;
         req.user = user;
         next();
     }catch(e){
